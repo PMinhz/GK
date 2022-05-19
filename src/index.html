@@ -2,10 +2,9 @@
 <html lang="en">
 
 <head>
-    <title>Multi-User Video Call</title>
+    <title>Video Call RTC</title>
 
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -22,7 +21,7 @@
     <script src='assets/js/autolink.js'></script>
 </head>
 
-<body style="background-color:black">
+<body>
     <div class="custom-modal" id='recording-options-modal'>
         <div class="custom-modal-content">
             <div class="row text-center">
@@ -44,10 +43,9 @@
 
     <nav class="navbar fixed-bottom bg-info rounded-0 d-print-none">
 
-
         <div class=" room-comm" hidden>
             <span style="padding-right:300px" class="text-white mr-5">
-                    Mã id: <span id='randomNumber'></span>
+                    ID: <span id='randomNumber'></span>
             </span>
 
             <button class="w3-xxlarge btn btn-sm rounded-0 btn-no-effect" id='toggle-video' title="Hide Video">
@@ -67,16 +65,16 @@
                 </button>
 
             <button class="w3-xxlarge btn btn-sm rounded-0 btn-no-effect text-white">
-                    <a href="/" class="text-white text-decoration-none"><i style="color:red" class="fa fa-times" title="Leave"></i></a>
+                    <a href="/" class="text-white text-decoration-none"><i style="color:red" class="fas fa-phone-slash" title="Leave"></i></a>
                 </button>
 
         </div>
-        <div class="text-white">Video Call</div>
+        <!-- <div class="text-white">Video Call</div> -->
     </nav>
 
     <div class="container-fluid" id='room-create' hidden>
         <div class="row">
-            <div class="col-12 h2 mt-5 text-center">Tạo cuộc họp</div>
+            <div id="taocuochop" class="col-12 h2 mt-5 text-center">TẠO CUỘC HỌP</div>
         </div>
 
         <div class="row mt-2">
@@ -84,18 +82,18 @@
                 <span class="form-text small text-danger" id='err-msg'></span>
             </div>
 
-            <div class="col-12 col-md-4 offset-md-4 mb-3">
+            <div class="col-12 col-md-4 offset-md-4 mb-3" style="color: rgb(0, 169, 191);">
                 <label for="room-name">Tiêu đề cuộc họp</label>
                 <input type="text" id='room-name' class="form-control rounded-0" placeholder="Tiêu đề cuộc họp">
             </div>
 
-            <div class="col-12 col-md-4 offset-md-4 mb-3">
+            <div class="col-12 col-md-4 offset-md-4 mb-3" style="color: rgb(0, 169, 191);">
                 <label for="your-name">Tên hiển thị</label>
                 <input type="text" id='your-name' class="form-control rounded-0" placeholder="Tên hiển thị">
             </div>
 
             <div class="col-12 col-md-4 offset-md-4 mb-3">
-                <button id='create-room' class="btn btn-block rounded-0 btn-info">Tạo</button>
+                <button id='create-room' class="btn btn-block rounded-0 btn btn-outline-info">Tạo</button>
             </div>
 
             <div class="col-12 col-md-4 offset-md-4 mb-3" id='room-created'></div>
@@ -104,7 +102,7 @@
 
     <div class="container-fluid" id='username-set' hidden>
         <div class="row">
-            <div class="col-12 h4 mt-5 text-center">Tên hiển thị</div>
+            <div id="taocuochop" class="col-12 h4 mt-5 text-center">THAM GIA CUỘC HỌP</div>
         </div>
 
         <div class="row mt-2">
@@ -112,13 +110,13 @@
                 <span class="form-text small text-danger" id='err-msg-username'></span>
             </div>
 
-            <div class="col-12 col-md-4 offset-md-4 mb-3">
-                <label for="username">Tên hiển thị</label>
+            <div class="col-12 col-md-4 offset-md-4 mb-3" style="color: rgb(255, 200, 0);">
+                <label for="username">Nhập tên hiển thị</label>
                 <input type="text" id='username' class="form-control rounded-0" placeholder="Tên">
             </div>
 
             <div class="col-12 col-md-4 offset-md-4 mb-3">
-                <button id='enter-room' class="btn btn-block rounded-0 btn-info">Tham gia cuộc họp</button>
+                <button id='enter-room' class="btn btn-block rounded-0 btn btn-outline-warning">Tham gia cuộc họp</button>
             </div>
         </div>
     </div>

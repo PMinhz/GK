@@ -1,7 +1,3 @@
-/**
- * @author Amir Sanni <amirsanni@gmail.com>
- * @date 6th January, 2020
- */
 import h from './helpers.js';
 
 window.addEventListener('load', () => {
@@ -30,7 +26,7 @@ window.addEventListener('load', () => {
         var recordedStream = [];
         var mediaRecorder = '';
 
-        //Get user video by default
+        //Lấy video người dừng mặc định
         getAndSetUserStream();
 
 
@@ -73,7 +69,7 @@ window.addEventListener('load', () => {
                             h.setLocalStream(stream);
                         }
 
-                        //save my stream
+                        //lưu stream
                         myStream = stream;
 
                         stream.getTracks().forEach((track) => {
@@ -102,7 +98,7 @@ window.addEventListener('load', () => {
 
         function getAndSetUserStream() {
             h.getUserFullMedia().then((stream) => {
-                //save my stream
+                //lưu stream 
                 myStream = stream;
 
                 h.setLocalStream(stream);
@@ -111,41 +107,24 @@ window.addEventListener('load', () => {
             });
         }
 
-
-        function sendMsg(msg) {
-            let data = {
-                room: room,
-                msg: msg,
-                sender: `${username} (${randomNumber})`
-            };
-
-            //emit chat message
-            socket.emit('chat', data);
-
-            //add localchat
-            h.addChat(data, 'local');
-        }
-
-
-
         function init(createOffer, partnerName) {
             pc[partnerName] = new RTCPeerConnection(h.getIceServer());
 
             if (screen && screen.getTracks().length) {
                 screen.getTracks().forEach((track) => {
-                    pc[partnerName].addTrack(track, screen); //should trigger negotiationneeded event
+                    pc[partnerName].addTrack(track, screen); //Kích hoạt sự kiện cần thỏa thuận
                 });
             } else if (myStream) {
                 myStream.getTracks().forEach((track) => {
-                    pc[partnerName].addTrack(track, myStream); //should trigger negotiationneeded event
+                    pc[partnerName].addTrack(track, myStream); //Kích hoạt sự kiện cần thỏa thuận
                 });
             } else {
                 h.getUserFullMedia().then((stream) => {
-                    //save my stream
+                    //lưu stream
                     myStream = stream;
 
                     stream.getTracks().forEach((track) => {
-                        pc[partnerName].addTrack(track, stream); //should trigger negotiationneeded event
+                        pc[partnerName].addTrack(track, stream); //Kích hoạt sự kiện cần thỏa thuận
                     });
 
                     h.setLocalStream(stream);
@@ -169,7 +148,7 @@ window.addEventListener('load', () => {
 
 
 
-            //send ice candidate to partnerNames
+            //Gửi ICE candidate cho partnerNames
             pc[partnerName].onicecandidate = ({ candidate }) => {
                 socket.emit('ice candidates', { candidate: candidate, to: partnerName, sender: socketId });
             };
@@ -182,7 +161,7 @@ window.addEventListener('load', () => {
                 if (document.getElementById(`${ partnerName }-video`)) {
                     document.getElementById(`${ partnerName }-video`).srcObject = str;
                 } else {
-                    //video elem
+                    //Thuộc tính video
                     let newVid = document.createElement('video');
                     newVid.id = `${ partnerName }-video`;
                     newVid.srcObject = str;
@@ -242,17 +221,17 @@ window.addEventListener('load', () => {
             h.shareScreen().then((stream) => {
                 h.toggleShareIcons(true);
 
-                //disable the video toggle btns while sharing screen. This is to ensure clicking on the btn does not interfere with the screen sharing
-                //It will be enabled was user stopped sharing screen
+                //Tắt btn Video khi đang share màn hình đảm bảo không ảnh hưởng đến chia sẻ màn hình
+                // btn Video sẽ được mở lại sau khi share màn hình xong
                 h.toggleVideoBtnDisabled(true);
 
-                //save my screen stream
+                //lưu màn hình stream
                 screen = stream;
 
-                //share the new stream with all partners
+                //share màn hình với mọi người
                 broadcastNewTracks(stream, 'video', false);
 
-                //When the stop sharing button shown by the browser is clicked
+                //Click btn "Share sceen" dừng chia sẻ màn hình 
                 screen.getVideoTracks()[0].addEventListener('ended', () => {
                     stopSharingScreen();
                 });
@@ -264,7 +243,7 @@ window.addEventListener('load', () => {
 
 
         function stopSharingScreen() {
-            //enable video toggle btn
+            //bật btn icon Video
             h.toggleVideoBtnDisabled(false);
 
             return new Promise((res, rej) => {
@@ -339,7 +318,7 @@ window.addEventListener('load', () => {
         }
 
 
-        //When the video icon is clicked
+        //Click vào icon Video
         document.getElementById('toggle-video').addEventListener('click', (e) => {
             e.preventDefault();
 
@@ -363,7 +342,7 @@ window.addEventListener('load', () => {
         });
 
 
-        //When the mute icon is clicked
+        //Click vào icon mute mic
         document.getElementById('toggle-mute').addEventListener('click', (e) => {
             e.preventDefault();
 
@@ -387,7 +366,7 @@ window.addEventListener('load', () => {
         });
 
 
-        //When user clicks the 'Share screen' button
+        //Khi click icon 'Share screen'
         document.getElementById('share-screen').addEventListener('click', (e) => {
             e.preventDefault();
 
@@ -399,12 +378,11 @@ window.addEventListener('load', () => {
         });
 
 
-        //When record button is clicked
+        //Khi click vào icon "record"
         document.getElementById('record').addEventListener('click', (e) => {
-            /**
-             * Ask user what they want to record.
-             * Get the stream based on selection and start recording
-             */
+            // Show tùy chọn user muốn record
+            // Nhận luồng của tùy chọn đó và bắt đầu record
+            
             if (!mediaRecorder || mediaRecorder.state == 'inactive') {
                 h.toggleModal('recording-options-modal', true);
             } else if (mediaRecorder.state == 'paused') {
@@ -415,7 +393,7 @@ window.addEventListener('load', () => {
         });
 
 
-        //When user choose to record screen
+        //Khi user chọn record screen
         document.getElementById('record-screen').addEventListener('click', () => {
             h.toggleModal('recording-options-modal', false);
 
@@ -429,7 +407,7 @@ window.addEventListener('load', () => {
         });
 
 
-        //When user choose to record own video
+        //Khi user chọn record video của họ
         document.getElementById('record-video').addEventListener('click', () => {
             h.toggleModal('recording-options-modal', false);
 

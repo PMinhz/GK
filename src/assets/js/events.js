@@ -3,7 +3,7 @@ import helpers from './helpers.js';
 window.addEventListener('load', () => {
 
 
-    //When the video frame is clicked. This will enable picture-in-picture
+    //Double click để di chuyển màn hình video của bản thân ( picture-in-picture )
     document.getElementById('local').addEventListener('click', () => {
         if (!document.pictureInPictureElement) {
             document.getElementById('local').requestPictureInPicture()
@@ -21,7 +21,7 @@ window.addEventListener('load', () => {
     });
 
 
-    //When the 'Create room" is button is clicked
+    //Khi click vào 'Tạo"
     document.getElementById('create-room').addEventListener('click', (e) => {
         e.preventDefault();
 
@@ -29,49 +29,49 @@ window.addEventListener('load', () => {
         let yourName = document.querySelector('#your-name').value;
 
         if (roomName && yourName) {
-            //remove error message, if any
+            //xóa error message nếu có
             document.querySelector('#err-msg').innerText = "";
 
-            //save the user's name in sessionStorage
+            //Lưu user's name sessionStorage
             sessionStorage.setItem('username', yourName);
 
-            //create room link
+            //Tạo link truy cập room
             let roomLink = `${ location.origin }?room=${ roomName.trim().replace( ' ', '_' ) }_${ helpers.generateRandomString() }`;
 
-            //show message with link to room
-            document.querySelector('#room-created').innerHTML = `Tạo phòng thành công nhấn <a href='${ roomLink }'>link này</a> để tham gia. 
-                Copy link trên cho nhưng người muốn tham gia.`;
+            //Show link truy cập
+            document.querySelector('#room-created').innerHTML = `Tạo phòng thành công nhấn <a id="linknay" href='${ roomLink }'>link này</a> để tham gia. 
+                Copy link trên cho những người muốn tham gia.`;
 
-            //empty the values
+            //Làm trống dữ liệu sau khi xuất hiện link truy cập
             document.querySelector('#room-name').value = '';
             document.querySelector('#your-name').value = '';
         } else {
-            document.querySelector('#err-msg').innerText = "Vui lòng nhập đủ";
+            document.querySelector('#err-msg').innerText = "Vui lòng nhập đủ thông tin";
         }
     });
 
 
-    //When the 'Enter room' button is clicked.
+    //Khi click 'Tham gia cuộc họp'
     document.getElementById('enter-room').addEventListener('click', (e) => {
         e.preventDefault();
 
         let name = document.querySelector('#username').value;
 
         if (name) {
-            //remove error message, if any
+            //xóa error message nếu có
             document.querySelector('#err-msg-username').innerText = "";
 
-            //save the user's name in sessionStorage
+            //Lưu user's name in sessionStorage
             sessionStorage.setItem('username', name);
 
-            //reload room
+            //tải room
             location.reload();
         } else {
             document.querySelector('#err-msg-username').innerText = "Vui lòng nhập tên";
         }
     });
 
-
+    //tùy chọn on/off mở rộng màn hình video user và on/off mic
     document.addEventListener('click', (e) => {
         if (e.target && e.target.classList.contains('expand-remote-video')) {
             helpers.maximiseStream(e);
