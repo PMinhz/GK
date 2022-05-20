@@ -3,7 +3,7 @@ import helpers from './helpers.js';
 window.addEventListener('load', () => {
 
 
-    //Double click để di chuyển màn hình video của bản thân ( picture-in-picture )
+    //Click để di chuyển màn hình video của bản thân ( picture-in-picture )
     document.getElementById('local').addEventListener('click', () => {
         if (!document.pictureInPictureElement) {
             document.getElementById('local').requestPictureInPicture()
@@ -80,8 +80,4 @@ window.addEventListener('load', () => {
         }
     });
 
-
-    document.getElementById('closeModal').addEventListener('click', () => {
-        helpers.toggleModal('recording-options-modal', false);
-    });
 });

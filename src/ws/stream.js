@@ -20,7 +20,7 @@ const stream = ( socket ) => {
         socket.to( data.to ).emit( 'sdp', { description: data.description, sender: data.sender } );
     } );
 
-    //load dữ liệu hình ảnh video
+    //load ICE 
     socket.on( 'ice candidates', ( data ) => {
         socket.to( data.to ).emit( 'ice candidates', { candidate: data.candidate, sender: data.sender } );
     } );

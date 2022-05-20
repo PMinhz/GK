@@ -8,7 +8,7 @@
     position: absolute;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 300000;
+    z-index: 300000; 
     padding: 10px;
     width: 100%;
     text-align: center;
@@ -19,7 +19,7 @@
 .remote-video-controls:hover {
     visibility: visible;
 }
-
+/* z-index: chồng lên lên trên */
 .local-video {
     bottom: 53px;
     left: 0;

@@ -20,7 +20,7 @@ export default {
         return !( document.hidden || document.onfocusout || window.onpagehide || window.onblur );
     },
 
-    //Load dữ liệu web 
+    //Gắn url + tên phòng
     getQString( url = '', keyToReturn = '' ) {
         url = url ? url : location.href;
         let queryStrings = decodeURIComponent( url ).split( '#', 2 )[0].split( '?', 2 )[1];
@@ -86,26 +86,7 @@ export default {
         }
     },
 
-    //lấy dữ liệu share màn hình
-    shareScreen() {
-        if ( this.userMediaAvailable() ) {
-            return navigator.mediaDevices.getDisplayMedia( {
-                video: {
-                    cursor: "always"
-                },
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    sampleRate: 44100
-                }
-            } );
-        }
-
-        else {
-            throw new Error( 'User media not available' );
-        }
-    },
-
+    //dịch vụ ICE
     getIceServer() {
         return {
             iceServers: [
@@ -124,43 +105,6 @@ export default {
         };
     },
 
-    replaceTrack( stream, recipientPeer ) {
-        let sender = recipientPeer.getSenders ? recipientPeer.getSenders().find( s => s.track && s.track.kind === stream.kind ) : false;
-
-        sender ? sender.replaceTrack( stream ) : '';
-    },
-
-
-
-    toggleShareIcons( share ) {
-        let shareIconElem = document.querySelector( '#share-screen' );
-
-        if ( share ) {
-            shareIconElem.setAttribute( 'title', 'Stop sharing screen' );
-            shareIconElem.children[0].classList.add( 'text-primary' );
-            shareIconElem.children[0].classList.remove( 'text-white' );
-        }
-
-        else {
-            shareIconElem.setAttribute( 'title', 'Share screen' );
-            shareIconElem.children[0].classList.add( 'text-white' );
-            shareIconElem.children[0].classList.remove( 'text-primary' );
-        }
-    },
-
-
-    toggleVideoBtnDisabled( disabled ) {
-        document.getElementById( 'toggle-video' ).disabled = disabled;
-    },
-
-
-    maximiseStream( e ) {
-        let elem = e.target.parentElement.previousElementSibling;
-
-        elem.requestFullscreen() || elem.mozRequestFullScreen() || elem.webkitRequestFullscreen() || elem.msRequestFullscreen();
-    },
-
-
     singleStreamToggleMute( e ) {
         if ( e.target.classList.contains( 'fa-microphone' ) ) {
             e.target.parentElement.previousElementSibling.muted = true;
@@ -175,16 +119,7 @@ export default {
         }
     },
 
-
-    saveRecordedStream( stream, user ) {
-        let blob = new Blob( stream, { type: 'video/webm' } );
-
-        let file = new File( [blob], `${ user }-${ moment().unix() }-record.webm` );
-
-        saveAs( file );
-    },
-
-
+    //thay đổi trạng thái icon
     toggleModal( id, show ) {
         let el = document.getElementById( id );
 
@@ -199,8 +134,12 @@ export default {
         }
     },
 
+    replaceTrack( stream, recipientPeer ) {
+        let sender = recipientPeer.getSenders ? recipientPeer.getSenders().find( s => s.track && s.track.kind === stream.kind ) : false;
 
-    
+        sender ? sender.replaceTrack( stream ) : '';
+    },
+
     setLocalStream( stream, mirrorMode = true ) {
         const localVidElem = document.getElementById( 'local' );
 

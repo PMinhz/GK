@@ -1,16 +1,19 @@
 import h from './helpers.js';
 
 window.addEventListener('load', () => {
+    //tạo socket cho server call
     const room = h.getQString(location.href, 'room');
     const username = sessionStorage.getItem('username');
-
+    
+    //kiểm tra đường link
     if (!room) {
-        document.querySelector('#room-create').attributes.removeNamedItem('hidden');
+        document.querySelector('#room-create').attributes.removeNamedItem('hidden'); //hiện lên thành tạo phòng 
     } else if (!username) {
-        document.querySelector('#username-set').attributes.removeNamedItem('hidden');
+        document.querySelector('#username-set').attributes.removeNamedItem('hidden'); //hiện lên thanh tạo tên
     } else {
-        let commElem = document.getElementsByClassName('room-comm');
+        let commElem = document.getElementsByClassName('room-comm'); //hiện các icon điều khiển của cuộc gọi
 
+        //remove icon hidden
         for (let i = 0; i < commElem.length; i++) {
             commElem[i].attributes.removeNamedItem('hidden');
         }
@@ -23,15 +26,15 @@ window.addEventListener('load', () => {
         var randomNumber = `__${h.generateRandomString()}__${h.generateRandomString()}__`;
         var myStream = '';
         var screen = '';
-        var recordedStream = [];
-        var mediaRecorder = '';
 
         //Lấy video người dừng mặc định
         getAndSetUserStream();
 
 
         socket.on('connect', () => {
-            //set socketId
+            
+            //set socketId trên local client (các user đang hoạt đông)
+            
             socketId = socket.io.engine.id;
             document.getElementById('randomNumber').innerText = randomNumber;
 
@@ -54,22 +57,22 @@ window.addEventListener('load', () => {
                 init(false, data.sender);
             });
 
-
+            //cung cấp thông tin kết nối về cấu hình ICE giữa các user
             socket.on('ice candidates', async(data) => {
                 data.candidate ? await pc[data.sender].addIceCandidate(new RTCIceCandidate(data.candidate)) : '';
             });
 
-
+            // Khởi tạo peer connections
             socket.on('sdp', async(data) => {
+                // về phía người gọi
                 if (data.description.type === 'offer') {
+                    //Tạo yêu cầu kết nối và mô tả cách kết nối hoạt động chứa thông tin ICE server
                     data.description ? await pc[data.sender].setRemoteDescription(new RTCSessionDescription(data.description)) : '';
-
                     h.getUserFullMedia().then(async(stream) => {
                         if (!document.getElementById('local').srcObject) {
                             h.setLocalStream(stream);
                         }
 
-                        //lưu stream
                         myStream = stream;
 
                         stream.getTracks().forEach((track) => {
@@ -84,18 +87,17 @@ window.addEventListener('load', () => {
                     }).catch((e) => {
                         console.error(e);
                     });
-                } else if (data.description.type === 'answer') {
+                } 
+                // về phía trả lời
+                else if (data.description.type === 'answer') {
+                    //gửi tín hiệu đồng ý
                     await pc[data.sender].setRemoteDescription(new RTCSessionDescription(data.description));
                 }
             });
 
-
-            socket.on('chat', (data) => {
-                h.addChat(data, 'remote');
-            });
         });
 
-
+        //tạo luồng dữ liệu với nhau giữa user và server
         function getAndSetUserStream() {
             h.getUserFullMedia().then((stream) => {
                 //lưu stream 
@@ -107,16 +109,19 @@ window.addEventListener('load', () => {
             });
         }
 
+        //kết nối giữa client với server
         function init(createOffer, partnerName) {
             pc[partnerName] = new RTCPeerConnection(h.getIceServer());
+            
+            //người nhận theo dõi luồng dữ liệu người gửi
 
             if (screen && screen.getTracks().length) {
                 screen.getTracks().forEach((track) => {
-                    pc[partnerName].addTrack(track, screen); //Kích hoạt sự kiện cần thỏa thuận
+                    pc[partnerName].addTrack(track, screen); 
                 });
             } else if (myStream) {
                 myStream.getTracks().forEach((track) => {
-                    pc[partnerName].addTrack(track, myStream); //Kích hoạt sự kiện cần thỏa thuận
+                    pc[partnerName].addTrack(track, myStream); 
                 });
             } else {
                 h.getUserFullMedia().then((stream) => {
@@ -124,7 +129,7 @@ window.addEventListener('load', () => {
                     myStream = stream;
 
                     stream.getTracks().forEach((track) => {
-                        pc[partnerName].addTrack(track, stream); //Kích hoạt sự kiện cần thỏa thuận
+                        pc[partnerName].addTrack(track, stream);
                     });
 
                     h.setLocalStream(stream);
@@ -133,9 +138,7 @@ window.addEventListener('load', () => {
                 });
             }
 
-
-
-            //create offer
+            //tạo yêu cầu mới đưa ra yêu cầu tham gia để thông báo cho các user khác
             if (createOffer) {
                 pc[partnerName].onnegotiationneeded = async() => {
                     let offer = await pc[partnerName].createOffer();
@@ -149,13 +152,14 @@ window.addEventListener('load', () => {
 
 
             //Gửi ICE candidate cho partnerNames
+            // Tạo ra kết nối thời gian thực giữa các user trên
             pc[partnerName].onicecandidate = ({ candidate }) => {
                 socket.emit('ice candidates', { candidate: candidate, to: partnerName, sender: socketId });
             };
 
 
 
-            //add
+            //Thêm video các user tham gia mới
             pc[partnerName].ontrack = (e) => {
                 let str = e.streams[0];
                 if (document.getElementById(`${ partnerName }-video`)) {
@@ -168,28 +172,27 @@ window.addEventListener('load', () => {
                     newVid.autoplay = true;
                     newVid.className = 'remote-video';
 
-                    //video controls elements
+                    //điều chỉnh video
                     let controlDiv = document.createElement('div');
                     controlDiv.className = 'remote-video-controls';
                     controlDiv.innerHTML = `<i class="fa fa-microphone text-white pr-3 mute-remote-mic" title="Mute"></i>
                         <i class="fa fa-expand text-white expand-remote-video" title="Expand"></i>`;
 
-                    //create a new div for card
+                    //tạo ra video mới
                     let cardDiv = document.createElement('div');
                     cardDiv.className = 'card card-sm';
                     cardDiv.id = partnerName;
                     cardDiv.appendChild(newVid);
                     cardDiv.appendChild(controlDiv);
 
-                    //put div in main-section elem
+                    //gắn các video user chung với nhau
                     document.getElementById('videos').appendChild(cardDiv);
 
                     h.adjustVideoElemSize();
                 }
             };
 
-
-
+            //tắt khung video của user đã out
             pc[partnerName].onconnectionstatechange = (d) => {
                 switch (pc[partnerName].iceConnectionState) {
                     case 'disconnected':
@@ -203,8 +206,6 @@ window.addEventListener('load', () => {
                 }
             };
 
-
-
             pc[partnerName].onsignalingstatechange = (d) => {
                 switch (pc[partnerName].signalingState) {
                     case 'closed':
@@ -215,51 +216,7 @@ window.addEventListener('load', () => {
             };
         }
 
-
-
-        function shareScreen() {
-            h.shareScreen().then((stream) => {
-                h.toggleShareIcons(true);
-
-                //Tắt btn Video khi đang share màn hình đảm bảo không ảnh hưởng đến chia sẻ màn hình
-                // btn Video sẽ được mở lại sau khi share màn hình xong
-                h.toggleVideoBtnDisabled(true);
-
-                //lưu màn hình stream
-                screen = stream;
-
-                //share màn hình với mọi người
-                broadcastNewTracks(stream, 'video', false);
-
-                //Click btn "Share sceen" dừng chia sẻ màn hình 
-                screen.getVideoTracks()[0].addEventListener('ended', () => {
-                    stopSharingScreen();
-                });
-            }).catch((e) => {
-                console.error(e);
-            });
-        }
-
-
-
-        function stopSharingScreen() {
-            //bật btn icon Video
-            h.toggleVideoBtnDisabled(false);
-
-            return new Promise((res, rej) => {
-                screen.getTracks().length ? screen.getTracks().forEach(track => track.stop()) : '';
-
-                res();
-            }).then(() => {
-                h.toggleShareIcons(false);
-                broadcastNewTracks(myStream, 'video');
-            }).catch((e) => {
-                console.error(e);
-            });
-        }
-
-
-
+        //cập nhật thay đổi ở luồng dữ liệu (tắt tiếng - video)
         function broadcastNewTracks(stream, type, mirrorMode = true) {
             h.setLocalStream(stream, mirrorMode);
 
@@ -274,56 +231,12 @@ window.addEventListener('load', () => {
             }
         }
 
-
-        function toggleRecordingIcons(isRecording) {
-            let e = document.getElementById('record');
-
-            if (isRecording) {
-                e.setAttribute('title', 'Stop recording');
-                e.children[0].classList.add('text-danger');
-                e.children[0].classList.remove('text-white');
-            } else {
-                e.setAttribute('title', 'Record');
-                e.children[0].classList.add('text-white');
-                e.children[0].classList.remove('text-danger');
-            }
-        }
-
-
-        function startRecording(stream) {
-            mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'video/webm;codecs=vp9'
-            });
-
-            mediaRecorder.start(1000);
-            toggleRecordingIcons(true);
-
-            mediaRecorder.ondataavailable = function(e) {
-                recordedStream.push(e.data);
-            };
-
-            mediaRecorder.onstop = function() {
-                toggleRecordingIcons(false);
-
-                h.saveRecordedStream(recordedStream, username);
-
-                setTimeout(() => {
-                    recordedStream = [];
-                }, 3000);
-            };
-
-            mediaRecorder.onerror = function(e) {
-                console.error(e);
-            };
-        }
-
-
         //Click vào icon Video
         document.getElementById('toggle-video').addEventListener('click', (e) => {
             e.preventDefault();
 
             let elem = document.getElementById('toggle-video');
-
+            
             if (myStream.getVideoTracks()[0].enabled) {
                 e.target.classList.remove('fa-video');
                 e.target.classList.add('fa-video-slash');
@@ -342,7 +255,7 @@ window.addEventListener('load', () => {
         });
 
 
-        //Click vào icon mute mic
+        //Click vào icon mute mic của người khác
         document.getElementById('toggle-mute').addEventListener('click', (e) => {
             e.preventDefault();
 
@@ -363,61 +276,6 @@ window.addEventListener('load', () => {
             }
 
             broadcastNewTracks(myStream, 'audio');
-        });
-
-
-        //Khi click icon 'Share screen'
-        document.getElementById('share-screen').addEventListener('click', (e) => {
-            e.preventDefault();
-
-            if (screen && screen.getVideoTracks().length && screen.getVideoTracks()[0].readyState != 'ended') {
-                stopSharingScreen();
-            } else {
-                shareScreen();
-            }
-        });
-
-
-        //Khi click vào icon "record"
-        document.getElementById('record').addEventListener('click', (e) => {
-            // Show tùy chọn user muốn record
-            // Nhận luồng của tùy chọn đó và bắt đầu record
-            
-            if (!mediaRecorder || mediaRecorder.state == 'inactive') {
-                h.toggleModal('recording-options-modal', true);
-            } else if (mediaRecorder.state == 'paused') {
-                mediaRecorder.resume();
-            } else if (mediaRecorder.state == 'recording') {
-                mediaRecorder.stop();
-            }
-        });
-
-
-        //Khi user chọn record screen
-        document.getElementById('record-screen').addEventListener('click', () => {
-            h.toggleModal('recording-options-modal', false);
-
-            if (screen && screen.getVideoTracks().length) {
-                startRecording(screen);
-            } else {
-                h.shareScreen().then((screenStream) => {
-                    startRecording(screenStream);
-                }).catch(() => {});
-            }
-        });
-
-
-        //Khi user chọn record video của họ
-        document.getElementById('record-video').addEventListener('click', () => {
-            h.toggleModal('recording-options-modal', false);
-
-            if (myStream && myStream.getTracks().length) {
-                startRecording(myStream);
-            } else {
-                h.getUserFullMedia().then((videoStream) => {
-                    startRecording(videoStream);
-                }).catch(() => {});
-            }
         });
     }
 });
