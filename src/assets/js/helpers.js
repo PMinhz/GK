@@ -147,6 +147,12 @@ export default {
         mirrorMode ? localVidElem.classList.add( 'mirror-mode' ) : localVidElem.classList.remove( 'mirror-mode' );
     },
 
+    maximiseStream( e ) {
+        let elem = e.target.parentElement.previousElementSibling;
+
+        elem.requestFullscreen() || elem.mozRequestFullScreen() || elem.webkitRequestFullscreen() || elem.msRequestFullscreen();
+    },
+
     // điều chỉnh kích thước video
     adjustVideoElemSize() {
         let elem = document.getElementsByClassName( 'card' );

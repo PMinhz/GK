@@ -138,7 +138,7 @@ window.addEventListener('load', () => {
                 });
             }
 
-            //tạo yêu cầu mới đưa ra yêu cầu tham gia để thông báo cho các user khác
+            //tạo yêu cầu mới tham gia để thông báo cho các user khác
             if (createOffer) {
                 pc[partnerName].onnegotiationneeded = async() => {
                     let offer = await pc[partnerName].createOffer();
